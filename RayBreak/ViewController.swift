@@ -7,19 +7,57 @@
 //
 
 import UIKit
+import MetalKit
+
+enum Colors {
+    static let wenderlichGreen = MTLClearColor(red: 0.0,
+                                               green: 0.4,
+                                               blue: 0.21,
+                                               alpha: 1)
+}
 
 class ViewController: UIViewController {
-
+    
+    var metalView: MTKView {
+        return view as! MTKView
+    }
+    
+    var device: MTLDevice!
+    
+    var commandQueue: MTLCommandQueue!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        metalView.delegate = self
+        
+        metalView.device = MTLCreateSystemDefaultDevice()
+        device = metalView.device
+        
+        metalView.clearColor = Colors.wenderlichGreen
+        
+        commandQueue = device.makeCommandQueue()
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+
+}
+
+
+extension ViewController: MTKViewDelegate {
+    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
     }
-
-
+    
+    func draw(in view: MTKView) {
+        guard let drawable = view.currentDrawable,
+            let descriptor = view.currentRenderPassDescriptor else {
+                return
+        }
+        let commandBuffer = commandQueue.makeCommandBuffer()
+        
+        let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: descriptor)
+        
+        commandEncoder.endEncoding()
+        commandBuffer.present(drawable)
+        commandBuffer.commit()
+    }
 }
 
