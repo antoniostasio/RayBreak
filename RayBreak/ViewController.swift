@@ -26,38 +26,22 @@ class ViewController: UIViewController {
     
     var commandQueue: MTLCommandQueue!
     
+    var renderer: Renderer?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        metalView.delegate = self
-        
-        metalView.device = MTLCreateSystemDefaultDevice()
-        device = metalView.device
         
         metalView.clearColor = Colors.wenderlichGreen
-        
-        commandQueue = device.makeCommandQueue()
-    }
 
-
-}
-
-
-extension ViewController: MTKViewDelegate {
-    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-    }
-    
-    func draw(in view: MTKView) {
-        guard let drawable = view.currentDrawable,
-            let descriptor = view.currentRenderPassDescriptor else {
-                return
+        metalView.device = MTLCreateSystemDefaultDevice()
+        guard let device = metalView.device else {
+            fatalError("Device not created. Run on a physical device.")
         }
-        let commandBuffer = commandQueue.makeCommandBuffer()
-        
-        let commandEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: descriptor)
-        
-        commandEncoder.endEncoding()
-        commandBuffer.present(drawable)
-        commandBuffer.commit()
+        renderer = Renderer(device: device)
+        metalView.delegate = renderer
     }
+
+
 }
+
 
