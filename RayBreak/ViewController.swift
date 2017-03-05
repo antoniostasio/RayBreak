@@ -38,6 +38,7 @@ class ViewController: UIViewController {
             fatalError("Device not created. Run on a physical device.")
         }
         renderer = Renderer(device: device)
+        renderer?.scene = GameScene(device: device, size: view.bounds.size)
         metalView.delegate = renderer
     }
 
